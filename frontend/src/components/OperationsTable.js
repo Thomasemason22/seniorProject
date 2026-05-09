@@ -30,6 +30,7 @@ function OperationsTable({ data, loading }) {
               <th>Staff</th>
               <th>PPH</th>
               <th>OT</th>
+              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -46,6 +47,7 @@ function OperationsTable({ data, loading }) {
                 <td>{row.staffing_level}</td>
                 <td>{Math.round(row.actual_pph || row.throughput).toLocaleString()}</td>
                 <td>{row.overtime_hours.toFixed(1)}</td>
+                <td>{row.notes || '-'}</td>
               </tr>
             ))}
           </tbody>

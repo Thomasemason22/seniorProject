@@ -14,7 +14,7 @@ test('renders dashboard title', async () => {
 
   render(<App />);
   const heading = await screen.findByRole('heading', {
-    name: /outbound operations dashboard/i,
+    name: /operations dashboard/i,
   });
 
   expect(heading).toBeInTheDocument();

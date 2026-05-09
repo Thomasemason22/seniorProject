@@ -126,6 +126,31 @@ select {
   border-radius: 8px;
 }
 
+.role-card {
+  margin-top: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.role-card label {
+  display: grid;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.role-card select {
+  min-height: 38px;
+  color: #f8fafc;
+  background: #1f2937;
+  border: 1px solid #334155;
+  border-radius: 7px;
+}
+
 .sidebar-note span,
 .sidebar-note strong {
   display: block;
@@ -204,7 +229,12 @@ select {
 .filter-panel,
 .kpi-grid,
 .chart-grid,
-.secondary-grid {
+.secondary-grid,
+.tools-panel,
+.report-panel,
+.plan-panel,
+.belt-detail-panel,
+.alerts-panel {
   margin-bottom: 18px;
 }
 
@@ -374,7 +404,12 @@ select {
 .leaderboard-panel,
 .risk-panel,
 .recommendations-panel,
-.staffing-panel {
+.staffing-panel,
+.tools-panel,
+.report-panel,
+.plan-panel,
+.belt-detail-panel,
+.alerts-panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -384,8 +419,181 @@ select {
 .leaderboard-panel,
 .risk-panel,
 .recommendations-panel,
-.staffing-panel {
+.staffing-panel,
+.tools-panel,
+.report-panel,
+.plan-panel,
+.belt-detail-panel,
+.alerts-panel {
   padding: 18px;
+}
+
+.tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tool-actions button,
+.entry-form button {
+  min-height: 38px;
+  padding: 8px 12px;
+  color: #ffffff;
+  background: #172033;
+  border: 1px solid #172033;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.75fr) minmax(260px, 0.75fr);
+  gap: 14px;
+}
+
+.entry-form {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.entry-form label,
+.upload-card,
+.calculator-card {
+  display: grid;
+  gap: 6px;
+}
+
+.entry-form label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.entry-form input,
+.entry-form select,
+.upload-card input,
+.belt-detail-panel select {
+  min-height: 40px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.entry-form button {
+  align-self: end;
+}
+
+.upload-card,
+.calculator-card {
+  padding: 14px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.upload-card p,
+.upload-card span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.calculator-card dl,
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.calculator-card div,
+.report-grid div {
+  padding: 13px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.calculator-card dt,
+.report-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.calculator-card dd,
+.report-grid strong {
+  display: block;
+  margin: 5px 0 0;
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.plan-list {
+  display: grid;
+  gap: 12px;
+}
+
+.plan-list article {
+  display: grid;
+  gap: 8px;
+  padding: 13px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.plan-list strong,
+.plan-list span,
+.plan-list em {
+  display: block;
+}
+
+.plan-list span,
+.plan-list em {
+  color: var(--muted);
+  font-size: 13px;
+  font-style: normal;
+}
+
+.plan-bars {
+  display: grid;
+  gap: 5px;
+}
+
+.plan-bars i,
+.plan-bars b {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.plan-bars i {
+  background: #94a3b8;
+}
+
+.plan-bars b {
+  background: var(--blue);
+}
+
+.alerts-list {
+  display: grid;
+  gap: 10px;
+}
+
+.alerts-list p {
+  margin: 0;
+  padding: 12px;
+  color: #78350f;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
 }
 
 .compact-table table {
@@ -691,19 +899,24 @@ td {
   }
 
   .nav-stack {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .kpi-grid,
   .chart-grid,
   .secondary-grid,
   .wide-grid,
-  .recommendation-grid {
+  .recommendation-grid,
+  .tools-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .entry-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -729,6 +942,10 @@ td {
   .wide-grid,
   .nav-stack,
   .recommendation-grid,
+  .tools-grid,
+  .entry-form,
+  .report-grid,
+  .calculator-card dl,
   .risk-stats,
   .staffing-grid {
     grid-template-columns: 1fr;
@@ -736,5 +953,31 @@ td {
 
   .chart-frame {
     height: 280px;
+  }
+}
+
+@media print {
+  .sidebar,
+  .filter-panel,
+  .tools-panel,
+  .status-pill,
+  .chart-card,
+  .recommendations-panel,
+  .table-panel {
+    display: none !important;
+  }
+
+  .dashboard-shell,
+  .dashboard-main,
+  .wide-grid,
+  .chart-grid,
+  .secondary-grid {
+    display: block;
+    width: 100%;
+    padding: 0;
+  }
+
+  body {
+    background: #ffffff;
   }
 }

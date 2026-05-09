@@ -24,6 +24,7 @@ class WarehouseOperation(db.Model):
     planned_pph = db.Column(db.Float)
     planned_hours = db.Column(db.Float)
     overtime_hours = db.Column(db.Float)
+    notes = db.Column(db.Text)
 
     def to_dict(self):
         return {
@@ -44,4 +45,5 @@ class WarehouseOperation(db.Model):
             "planned_pph": self.planned_pph,
             "planned_hours": self.planned_hours,
             "overtime_hours": self.overtime_hours,
+            "notes": self.notes or "",
         }

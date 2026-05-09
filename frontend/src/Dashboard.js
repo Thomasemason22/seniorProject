@@ -12,6 +12,11 @@ import AreaLeaderboard from './components/AreaLeaderboard';
 import RecommendationsPanel from './components/RecommendationsPanel';
 import OutboundPerformancePanel from './components/OutboundPerformancePanel';
 import StaffingMatrix from './components/StaffingMatrix';
+import ShiftToolsPanel from './components/ShiftToolsPanel';
+import DailyReportPanel from './components/DailyReportPanel';
+import PlanActualPanel from './components/PlanActualPanel';
+import BeltDetailPanel from './components/BeltDetailPanel';
+import AlertsPanel from './components/AlertsPanel';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
@@ -61,6 +66,8 @@ function getSummary(data) {
 function Dashboard() {
   const [operations, setOperations] = useState([]);
   const [kpis, setKpis] = useState(getSummary([]));
+  const [selectedBelt, setSelectedBelt] = useState('');
+  const [role, setRole] = useState('Supervisor');
   const [filters, setFilters] = useState({
     shift: 'All',
     area: 'All',
@@ -72,25 +79,25 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [ops, kpiData] = await Promise.all([
+        axios.get(`${API_BASE_URL}/operations`),
+        axios.get(`${API_BASE_URL}/kpis`),
+      ]);
+
+      setOperations(ops.data);
+      setKpis(kpiData.data);
+      setError('');
+    } catch (requestError) {
+      setError('Unable to load dashboard data. Make sure the Flask API is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [ops, kpiData] = await Promise.all([
-          axios.get(`${API_BASE_URL}/operations`),
-          axios.get(`${API_BASE_URL}/kpis`),
-        ]);
-
-        setOperations(ops.data);
-        setKpis(kpiData.data);
-        setError('');
-      } catch (requestError) {
-        setError('Unable to load dashboard data. Make sure the Flask API is running.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -127,6 +134,52 @@ function Dashboard() {
       search: '',
     });
   };
+  const createRecord = async record => {
+    const response = await axios.post(`${API_BASE_URL}/operations`, record);
+    const nextOperations = [response.data, ...operations];
+    setOperations(nextOperations);
+    setKpis(getSummary(nextOperations));
+  };
+  const bulkCreate = async records => {
+    const response = await axios.post(`${API_BASE_URL}/operations/bulk`, records);
+    const nextOperations = [...response.data, ...operations];
+    setOperations(nextOperations);
+    setKpis(getSummary(nextOperations));
+  };
+  const exportCsv = () => {
+    const headers = [
+      'date',
+      'shift',
+      'area_group',
+      'belt',
+      'gross_volume',
+      'scanned_volume',
+      'staffing_level',
+      'hours',
+      'overtime_hours',
+      'paid_day',
+      'actual_pph',
+      'planned_hours',
+      'notes',
+    ];
+    const rows = filteredOperations.map(item => headers.map(header => `"${String(item[header] ?? '').replaceAll('"', '""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'operations-dashboard-export.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+  const printReport = () => {
+    window.print();
+  };
+
+  useEffect(() => {
+    if (filteredOperations.length && !filteredOperations.some(item => item.belt === selectedBelt)) {
+      setSelectedBelt(filteredOperations[0].belt);
+    }
+  }, [filteredOperations, selectedBelt]);
 
   return (
     <div className="dashboard-shell">
@@ -141,6 +194,8 @@ function Dashboard() {
 
         <nav className="nav-stack" aria-label="Dashboard sections">
           <a href="#overview" className="active">Overview</a>
+          <a href="#tools">Tools</a>
+          <a href="#report">Report</a>
           <a href="#trends">Trends</a>
           <a href="#areas">Areas</a>
           <a href="#outbounds">Outbounds</a>
@@ -152,13 +207,24 @@ function Dashboard() {
           <span>Live API</span>
           <strong>{operations.length.toLocaleString()} records</strong>
         </div>
+
+        <div className="role-card">
+          <label>
+            Role
+            <select value={role} onChange={event => setRole(event.target.value)}>
+              <option>Supervisor</option>
+              <option>Admin</option>
+              <option>Viewer</option>
+            </select>
+          </label>
+        </div>
       </aside>
 
       <main className="dashboard-main">
         <section className="topbar" id="overview">
           <div>
             <p className="eyebrow">Warehouse analytics</p>
-            <h2>Outbound Operations Dashboard</h2>
+            <h2>Operations Dashboard</h2>
             <p className="summary-copy">
               Monitor package flow, staffing pressure, overtime load, and area performance.
             </p>
@@ -249,6 +315,29 @@ function Dashboard() {
         </section>
 
         <KPIcards kpis={displayedKpis} loading={loading} />
+
+        {role !== 'Viewer' && (
+          <ShiftToolsPanel
+            onCreateRecord={createRecord}
+            onBulkCreate={bulkCreate}
+            onExportCsv={exportCsv}
+            onPrintReport={printReport}
+          />
+        )}
+
+        <section className="wide-grid report-layout">
+          <DailyReportPanel data={filteredOperations} kpis={displayedKpis} />
+          <PlanActualPanel kpis={displayedKpis} />
+        </section>
+
+        <section className="wide-grid">
+          <BeltDetailPanel
+            data={filteredOperations}
+            selectedBelt={selectedBelt}
+            onSelectBelt={setSelectedBelt}
+          />
+          <AlertsPanel data={filteredOperations} />
+        </section>
 
         <section className="chart-grid" id="trends">
           <VolumeChart data={filteredOperations} loading={loading} />

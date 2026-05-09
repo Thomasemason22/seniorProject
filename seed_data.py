@@ -119,6 +119,7 @@ def seed_database(record_count=1000):
                 planned_pph=planned_pph,
                 planned_hours=planned_hours,
                 overtime_hours=overtime_hours,
+                notes="",
             )
 
             db.session.add(record)
