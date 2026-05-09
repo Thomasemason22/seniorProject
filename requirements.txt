@@ -1,0 +1,5 @@
+Faker
+Flask
+Flask-Cors
+Flask-SQLAlchemy
+pandas
