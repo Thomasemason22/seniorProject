@@ -35,20 +35,22 @@ def get_operations():
 
 
 def build_operation(payload):
+    area_group = payload.get("area_group")
     gross_volume = int(payload.get("gross_volume") or payload.get("package_volume") or 0)
-    scanned_volume = int(payload.get("scanned_volume") or gross_volume)
+    scanned_volume = int(payload.get("scanned_volume") or 0) if area_group == "Outbounds" else 0
     staffing_level = int(payload.get("staffing_level") or 0)
     hours = float(payload.get("hours") or 0)
     overtime_hours = float(payload.get("overtime_hours") or 0)
     paid_day = float(payload.get("paid_day") or ((staffing_level * hours) + overtime_hours))
     planned_hours = float(payload.get("planned_hours") or (gross_volume / 265 if gross_volume else 0))
-    actual_pph = float(payload.get("actual_pph") or (scanned_volume / paid_day if paid_day else 0))
+    pph_volume = scanned_volume if area_group == "Outbounds" else gross_volume
+    actual_pph = float(payload.get("actual_pph") or (pph_volume / paid_day if paid_day else 0))
 
     return WarehouseOperation(
         date=payload.get("date"),
         shift=payload.get("shift"),
         outbound_area=payload.get("outbound_area") or payload.get("belt"),
-        area_group=payload.get("area_group"),
+        area_group=area_group,
         belt=payload.get("belt") or payload.get("outbound_area"),
         package_volume=gross_volume,
         gross_volume=gross_volume,

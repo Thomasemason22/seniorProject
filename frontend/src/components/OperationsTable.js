@@ -23,7 +23,7 @@ function OperationsTable({ data, loading }) {
               <th>Shift</th>
               <th>Group</th>
               <th>Area</th>
-              <th>Scanned</th>
+              <th>Outbound Scans</th>
               <th>Gross</th>
               <th>Hours</th>
               <th>Paid Day</th>
@@ -40,7 +40,7 @@ function OperationsTable({ data, loading }) {
                 <td><span className="tag">{row.shift}</span></td>
                 <td>{row.area_group}</td>
                 <td>{row.outbound_area}</td>
-                <td>{(row.scanned_volume || 0).toLocaleString()}</td>
+                <td>{row.area_group === 'Outbounds' ? (row.scanned_volume || 0).toLocaleString() : '-'}</td>
                 <td>{(row.gross_volume || row.package_volume).toLocaleString()}</td>
                 <td>{(row.hours || 0).toFixed(1)}</td>
                 <td>{(row.paid_day || 0).toFixed(1)}</td>

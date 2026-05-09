@@ -6,9 +6,9 @@ function getAlerts(data) {
   data.forEach(item => {
     const gross = item.gross_volume || item.package_volume || 0;
     const scanned = item.scanned_volume || 0;
-    const scanRate = gross ? scanned / gross : 1;
+    const scanRate = item.area_group === 'Outbounds' && gross ? scanned / gross : 1;
 
-    if (scanRate < 0.7) {
+    if (item.area_group === 'Outbounds' && scanRate < 0.7) {
       alerts.push(`${item.belt} scan rate is ${(scanRate * 100).toFixed(1)}% on ${item.date}.`);
     }
 

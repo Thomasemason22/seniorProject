@@ -234,7 +234,8 @@ select {
 .report-panel,
 .plan-panel,
 .belt-detail-panel,
-.alerts-panel {
+.alerts-panel,
+.process-panel {
   margin-bottom: 18px;
 }
 
@@ -409,7 +410,8 @@ select {
 .report-panel,
 .plan-panel,
 .belt-detail-panel,
-.alerts-panel {
+.alerts-panel,
+.process-panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -424,8 +426,46 @@ select {
 .report-panel,
 .plan-panel,
 .belt-detail-panel,
-.alerts-panel {
+.alerts-panel,
+.process-panel {
   padding: 18px;
+}
+
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.process-steps article {
+  padding: 14px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.process-steps span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  background: var(--blue);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.process-steps strong {
+  display: block;
+  margin-top: 12px;
+}
+
+.process-steps p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .tool-actions {
@@ -907,7 +947,8 @@ td {
   .secondary-grid,
   .wide-grid,
   .recommendation-grid,
-  .tools-grid {
+  .tools-grid,
+  .process-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -946,6 +987,7 @@ td {
   .entry-form,
   .report-grid,
   .calculator-card dl,
+  .process-steps,
   .risk-stats,
   .staffing-grid {
     grid-template-columns: 1fr;

@@ -64,10 +64,13 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
   const [form, setForm] = useState(initialForm);
   const [csvStatus, setCsvStatus] = useState('');
   const plannedHours = Number(form.gross_volume || 0) / 265;
+  const scansEnabled = form.area_group === 'Outbounds';
+  const scannedVolume = scansEnabled ? Number(form.scanned_volume || 0) : 0;
   const paidDay = form.paid_day
     ? Number(form.paid_day)
     : (Number(form.staffing_level || 0) * Number(form.hours || 0)) + Number(form.overtime_hours || 0);
-  const actualPph = paidDay ? Number(form.scanned_volume || 0) / paidDay : 0;
+  const actualPphVolume = scansEnabled ? scannedVolume : Number(form.gross_volume || 0);
+  const actualPph = paidDay ? actualPphVolume / paidDay : 0;
   const belts = useMemo(() => getBelts(form.area_group), [form.area_group]);
 
   const updateForm = event => {
@@ -79,6 +82,7 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
 
     if (name === 'area_group') {
       nextForm.belt = getBelts(value)[0];
+      nextForm.scanned_volume = value === 'Outbounds' ? initialForm.scanned_volume : 0;
     }
 
     setForm(nextForm);
@@ -89,6 +93,7 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
     onCreateRecord({
       ...form,
       outbound_area: form.belt,
+      scanned_volume: scansEnabled ? form.scanned_volume : 0,
       paid_day: paidDay,
       planned_hours: plannedHours,
     });
@@ -148,7 +153,7 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
             </select>
           </label>
           <label>Gross<input name="gross_volume" type="number" value={form.gross_volume} onChange={updateForm} /></label>
-          <label>Scanned<input name="scanned_volume" type="number" value={form.scanned_volume} onChange={updateForm} /></label>
+          <label>Outbound scans<input name="scanned_volume" type="number" value={scansEnabled ? form.scanned_volume : 0} onChange={updateForm} disabled={!scansEnabled} /></label>
           <label>Staff<input name="staffing_level" type="number" value={form.staffing_level} onChange={updateForm} /></label>
           <label>Hours<input name="hours" type="number" step="0.1" value={form.hours} onChange={updateForm} /></label>
           <label>OT<input name="overtime_hours" type="number" step="0.1" value={form.overtime_hours} onChange={updateForm} /></label>
@@ -158,7 +163,7 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
 
         <div className="upload-card">
           <strong>CSV Upload</strong>
-          <p>Use headers like date, shift, area_group, belt, gross_volume, scanned_volume, staffing_level, hours, overtime_hours, notes.</p>
+          <p>Use headers like date, shift, area_group, belt, gross_volume, scanned_volume, staffing_level, hours, overtime_hours, notes. Scanned volume is only applied to Outbounds.</p>
           <input type="file" accept=".csv,text/csv" onChange={handleCsv} />
           <span>{csvStatus || 'No CSV selected'}</span>
         </div>

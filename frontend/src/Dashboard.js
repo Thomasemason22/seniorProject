@@ -17,6 +17,7 @@ import DailyReportPanel from './components/DailyReportPanel';
 import PlanActualPanel from './components/PlanActualPanel';
 import BeltDetailPanel from './components/BeltDetailPanel';
 import AlertsPanel from './components/AlertsPanel';
+import ProcessFlowPanel from './components/ProcessFlowPanel';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
@@ -32,6 +33,7 @@ function getSummary(data) {
       avg_staffing: 0,
       total_overtime: 0,
       total_scanned: 0,
+      outbound_gross_volume: 0,
       total_paid_day: 0,
       avg_pph: 0,
       planned_hours: 0,
@@ -42,6 +44,9 @@ function getSummary(data) {
 
   const totalVolume = data.reduce((sum, item) => sum + item.package_volume, 0);
   const totalScanned = data.reduce((sum, item) => sum + (item.scanned_volume || 0), 0);
+  const outboundGrossVolume = data
+    .filter(item => item.area_group === 'Outbounds')
+    .reduce((sum, item) => sum + (item.gross_volume || item.package_volume), 0);
   const totalThroughput = data.reduce((sum, item) => sum + item.throughput, 0);
   const totalStaffing = data.reduce((sum, item) => sum + item.staffing_level, 0);
   const totalOvertime = data.reduce((sum, item) => sum + item.overtime_hours, 0);
@@ -52,6 +57,7 @@ function getSummary(data) {
   return {
     total_volume: totalVolume,
     total_scanned: totalScanned,
+    outbound_gross_volume: outboundGrossVolume,
     avg_throughput: totalThroughput / data.length,
     avg_staffing: totalStaffing / data.length,
     total_overtime: totalOvertime,
@@ -329,6 +335,8 @@ function Dashboard() {
           <DailyReportPanel data={filteredOperations} kpis={displayedKpis} />
           <PlanActualPanel kpis={displayedKpis} />
         </section>
+
+        <ProcessFlowPanel />
 
         <section className="wide-grid">
           <BeltDetailPanel

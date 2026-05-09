@@ -45,7 +45,7 @@ function VolumeChart({ data, loading }) {
         pointRadius: 2,
       },
       {
-        label: 'Scanned Volume',
+        label: 'Outbound Scanned Volume',
         data: sortedData.map(item => item.scanned_volume || 0),
         borderColor: '#0f766e',
         backgroundColor: 'rgba(15, 118, 110, 0.1)',
@@ -85,7 +85,7 @@ function VolumeChart({ data, loading }) {
       <div className="panel-heading">
         <div>
           <p className="eyebrow">Daily flow</p>
-          <h3>Gross vs Scanned Volume</h3>
+          <h3>Gross Flow vs Outbound Scans</h3>
         </div>
         <span>{loading ? 'Loading' : `${sortedData.length} days`}</span>
       </div>

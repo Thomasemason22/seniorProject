@@ -13,8 +13,8 @@ function PlanActualPanel({ kpis }) {
       actual: kpis.avg_pph || 0,
     },
     {
-      label: 'Volume',
-      planned: kpis.total_volume || 0,
+      label: 'Outbound Scans',
+      planned: kpis.outbound_gross_volume || 0,
       actual: kpis.total_scanned || 0,
     },
   ];
