@@ -139,6 +139,7 @@ function AreaStaffDetailPanel({ data, selectedArea, onSelectArea, loading }) {
   const areas = Array.from(new Set(data.map(item => item.outbound_area || item.belt))).sort();
   const rows = getAreaRows(data, selectedArea || areas[0]);
   const areaName = selectedArea || areas[0] || 'No area';
+  const shiftCount = new Set(rows.map(item => `${item.date}-${item.shift}`)).size || 1;
   const volume = rows.reduce((sum, item) => sum + (item.gross_volume || item.package_volume || 0), 0);
   const staffTotal = rows.reduce((sum, item) => sum + (item.staffing_level || 0), 0);
   const paidDay = rows.reduce((sum, item) => sum + (item.paid_day || 0), 0);
@@ -146,6 +147,9 @@ function AreaStaffDetailPanel({ data, selectedArea, onSelectArea, loading }) {
   const avgStaff = rows.length ? staffTotal / rows.length : 0;
   const peakStaff = rows.length ? Math.max(...rows.map(item => item.staffing_level || 0)) : 0;
   const pph = paidDay ? volume / paidDay : 0;
+  const avgVolume = volume / shiftCount;
+  const avgPaidDay = paidDay / shiftCount;
+  const avgOvertime = overtime / shiftCount;
   const recentRows = [...rows]
     .sort((a, b) => `${b.date} ${b.shift}`.localeCompare(`${a.date} ${a.shift}`))
     .slice(0, 8);
@@ -178,9 +182,9 @@ function AreaStaffDetailPanel({ data, selectedArea, onSelectArea, loading }) {
       <div className="staff-summary-grid">
         <article><span>Avg staff</span><strong>{avgStaff.toFixed(1)}</strong></article>
         <article><span>Peak staff</span><strong>{peakStaff}</strong></article>
-        <article><span>Paid day</span><strong>{paidDay.toFixed(1)}</strong></article>
-        <article><span>Overtime</span><strong>{overtime.toFixed(1)}</strong></article>
-        <article><span>Volume</span><strong>{Math.round(volume).toLocaleString()}</strong></article>
+        <article><span>Avg paid day</span><strong>{avgPaidDay.toFixed(1)}</strong></article>
+        <article><span>Avg overtime</span><strong>{avgOvertime.toFixed(1)}</strong></article>
+        <article><span>Avg volume</span><strong>{Math.round(avgVolume).toLocaleString()}</strong></article>
         <article><span>PPH</span><strong>{Math.round(pph).toLocaleString()}</strong></article>
       </div>
 

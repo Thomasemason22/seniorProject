@@ -12,12 +12,26 @@ function getBusiest(rows, group) {
   rows
     .filter(item => item.area_group === group)
     .forEach(item => {
-      grouped[item.belt] = (grouped[item.belt] || 0) + (item.gross_volume || item.package_volume || 0);
+      const shiftKey = `${item.date}-${item.shift}`;
+
+      if (!grouped[item.belt]) {
+        grouped[item.belt] = {
+          belt: item.belt,
+          volume: 0,
+          shiftKeys: new Set(),
+        };
+      }
+
+      grouped[item.belt].volume += item.gross_volume || item.package_volume || 0;
+      grouped[item.belt].shiftKeys.add(shiftKey);
     });
 
-  return Object.entries(grouped)
-    .map(([belt, volume]) => ({ belt, volume }))
-    .sort((a, b) => b.volume - a.volume)[0];
+  return Object.values(grouped)
+    .map(row => ({
+      belt: row.belt,
+      avgVolume: row.volume / Math.max(1, row.shiftKeys.size),
+    }))
+    .sort((a, b) => b.avgVolume - a.avgVolume)[0];
 }
 
 function SortSummaryPanel({ data, kpis, loading }) {
@@ -42,8 +56,8 @@ function SortSummaryPanel({ data, kpis, loading }) {
     { label: 'Outbound scanned', value: Math.round(scanned).toLocaleString() },
     { label: 'Scan rate', value: `${scanRate.toFixed(1)}%` },
     { label: 'Paid day', value: Math.round(paidDay).toLocaleString() },
-    { label: 'Busiest PD', value: busiestPd ? `${busiestPd.belt} ${Math.round(busiestPd.volume).toLocaleString()}` : '--' },
-    { label: 'Busiest UL', value: busiestUl ? `${busiestUl.belt} ${Math.round(busiestUl.volume).toLocaleString()}` : '--' },
+    { label: 'Busiest PD avg', value: busiestPd ? `${busiestPd.belt} ${Math.round(busiestPd.avgVolume).toLocaleString()}` : '--' },
+    { label: 'Busiest UL avg', value: busiestUl ? `${busiestUl.belt} ${Math.round(busiestUl.avgVolume).toLocaleString()}` : '--' },
   ];
 
   return (

@@ -41,10 +41,10 @@ function getRecommendations(data, kpis) {
     });
   }
 
-  if (avgStaffing < 14 && peakVolume > 18000) {
+  if (avgStaffing < 14 && peakVolume > 250000) {
     recommendations.push({
       title: 'Review staffing floor',
-      detail: 'Peak volume is high while average staffing is comparatively low.',
+      detail: 'Peak shift volume is above 250k while average staffing is comparatively low.',
       tone: 'warning',
     });
   }

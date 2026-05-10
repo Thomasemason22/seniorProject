@@ -6,6 +6,8 @@ function getOutboundRows(data) {
   data
     .filter(item => item.area_group === 'Outbounds')
     .forEach(item => {
+      const shiftKey = `${item.date}-${item.shift}`;
+
       if (!grouped[item.belt]) {
         grouped[item.belt] = {
           belt: item.belt,
@@ -15,24 +17,36 @@ function getOutboundRows(data) {
           plannedHours: 0,
           overtime: 0,
           records: 0,
+          shiftKeys: new Set(),
         };
       }
 
-      grouped[item.belt].gross += item.gross_volume || item.package_volume;
+      grouped[item.belt].gross += item.gross_volume || item.package_volume || 0;
       grouped[item.belt].scanned += item.scanned_volume || 0;
       grouped[item.belt].paidDay += item.paid_day || 0;
       grouped[item.belt].plannedHours += item.planned_hours || 0;
       grouped[item.belt].overtime += item.overtime_hours || 0;
       grouped[item.belt].records += 1;
+      grouped[item.belt].shiftKeys.add(shiftKey);
     });
 
   return Object.values(grouped)
-    .map(row => ({
-      ...row,
-      scanRate: row.gross ? (row.scanned / row.gross) * 100 : 0,
-      actualPph: row.paidDay ? row.scanned / row.paidDay : 0,
-      plannedPph: 265,
-    }))
+    .map(row => {
+      const shiftCount = Math.max(1, row.shiftKeys.size);
+
+      return {
+        ...row,
+        shiftCount,
+        avgGross: row.gross / shiftCount,
+        avgScanned: row.scanned / shiftCount,
+        avgPaidDay: row.paidDay / shiftCount,
+        avgPlannedHours: row.plannedHours / shiftCount,
+        avgOvertime: row.overtime / shiftCount,
+        scanRate: row.gross ? (row.scanned / row.gross) * 100 : 0,
+        actualPph: row.paidDay ? row.scanned / row.paidDay : 0,
+        plannedPph: 265,
+      };
+    })
     .sort((a, b) => Number(a.belt.replace('PD ', '')) - Number(b.belt.replace('PD ', '')));
 }
 
@@ -44,7 +58,7 @@ function OutboundPerformancePanel({ data, loading }) {
       <div className="panel-heading">
         <div>
           <p className="eyebrow">Outbound belts</p>
-          <h3>PD Scan and Gross Volume</h3>
+          <h3>PD Avg Shift Scan and Gross</h3>
         </div>
         <span>{loading ? 'Loading' : `${rows.length} PD belts`}</span>
       </div>
@@ -54,28 +68,28 @@ function OutboundPerformancePanel({ data, loading }) {
           <thead>
             <tr>
               <th>Belt</th>
-              <th>Scanned</th>
-              <th>Gross</th>
+              <th>Avg Scanned</th>
+              <th>Avg Gross</th>
               <th>Scan %</th>
-              <th>Paid Day</th>
-              <th>OT Hours</th>
+              <th>Avg Paid</th>
+              <th>Avg OT</th>
               <th>Actual PPH</th>
               <th>Plan PPH</th>
-              <th>Planned Hrs</th>
+              <th>Avg Plan Hrs</th>
             </tr>
           </thead>
           <tbody>
             {rows.map(row => (
               <tr key={row.belt}>
                 <td><span className="tag">{row.belt}</span></td>
-                <td>{Math.round(row.scanned).toLocaleString()}</td>
-                <td>{Math.round(row.gross).toLocaleString()}</td>
+                <td>{Math.round(row.avgScanned).toLocaleString()}</td>
+                <td>{Math.round(row.avgGross).toLocaleString()}</td>
                 <td>{row.scanRate.toFixed(1)}%</td>
-                <td>{row.paidDay.toFixed(1)}</td>
-                <td>{row.overtime.toFixed(1)}</td>
+                <td>{row.avgPaidDay.toFixed(1)}</td>
+                <td>{row.avgOvertime.toFixed(1)}</td>
                 <td>{Math.round(row.actualPph).toLocaleString()}</td>
                 <td>{row.plannedPph}</td>
-                <td>{row.plannedHours.toFixed(1)}</td>
+                <td>{row.avgPlannedHours.toFixed(1)}</td>
               </tr>
             ))}
           </tbody>
