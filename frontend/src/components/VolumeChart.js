@@ -26,19 +26,37 @@ ChartJS.register(
 );
 
 function VolumeChart({ data, loading }) {
-  const sortedData = [...data]
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
+  const grouped = {};
+
+  data.forEach(item => {
+    const key = `${item.date}-${item.shift}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: item.date,
+        shift: item.shift,
+        gross: 0,
+        scanned: 0,
+      };
+    }
+
+    grouped[key].gross += item.gross_volume || item.package_volume || 0;
+    grouped[key].scanned += item.scanned_volume || 0;
+  });
+
+  const sortedData = Object.values(grouped)
+    .sort((a, b) => `${a.date} ${a.shift}`.localeCompare(`${b.date} ${b.shift}`))
     .slice(-30);
-  const labels = sortedData.map(item => item.date);
+  const labels = sortedData.map(item => `${item.date.slice(5)} ${item.shift.slice(0, 3)}`);
 
   const chartData = {
     labels,
     datasets: [
       {
-        label: 'Gross Volume',
-        data: sortedData.map(item => item.gross_volume || item.package_volume),
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.12)',
+        label: 'Shift Gross Volume',
+        data: sortedData.map(item => item.gross),
+        borderColor: '#351c15',
+        backgroundColor: 'rgba(53, 28, 21, 0.12)',
         borderWidth: 2,
         fill: true,
         tension: 0.35,
@@ -46,9 +64,9 @@ function VolumeChart({ data, loading }) {
       },
       {
         label: 'Outbound Scanned Volume',
-        data: sortedData.map(item => item.scanned_volume || 0),
-        borderColor: '#0f766e',
-        backgroundColor: 'rgba(15, 118, 110, 0.1)',
+        data: sortedData.map(item => item.scanned),
+        borderColor: '#ffb500',
+        backgroundColor: 'rgba(255, 181, 0, 0.18)',
         borderWidth: 2,
         fill: true,
         tension: 0.35,
@@ -73,8 +91,12 @@ function VolumeChart({ data, loading }) {
         },
       },
       y: {
+        suggestedMax: 300000,
         border: {
           display: false,
+        },
+        ticks: {
+          callback: value => `${Math.round(value / 1000)}k`,
         },
       },
     },
@@ -85,9 +107,9 @@ function VolumeChart({ data, loading }) {
       <div className="panel-heading">
         <div>
           <p className="eyebrow">Daily flow</p>
-          <h3>Gross Flow vs Outbound Scans</h3>
+          <h3>Shift Volume vs Outbound Scans</h3>
         </div>
-        <span>{loading ? 'Loading' : `${sortedData.length} days`}</span>
+        <span>{loading ? 'Loading' : `${sortedData.length} shifts`}</span>
       </div>
       <div className="chart-frame">
         <Line data={chartData} options={options} />

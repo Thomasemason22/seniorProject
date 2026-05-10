@@ -31,7 +31,7 @@ function getOutboundRows(data) {
       ...row,
       scanRate: row.gross ? (row.scanned / row.gross) * 100 : 0,
       actualPph: row.paidDay ? row.scanned / row.paidDay : 0,
-      plannedPph: row.records ? row.plannedHours / row.records : 0,
+      plannedPph: 265,
     }))
     .sort((a, b) => Number(a.belt.replace('PD ', '')) - Number(b.belt.replace('PD ', '')));
 }
@@ -60,6 +60,7 @@ function OutboundPerformancePanel({ data, loading }) {
               <th>Paid Day</th>
               <th>OT Hours</th>
               <th>Actual PPH</th>
+              <th>Plan PPH</th>
               <th>Planned Hrs</th>
             </tr>
           </thead>
@@ -73,6 +74,7 @@ function OutboundPerformancePanel({ data, loading }) {
                 <td>{row.paidDay.toFixed(1)}</td>
                 <td>{row.overtime.toFixed(1)}</td>
                 <td>{Math.round(row.actualPph).toLocaleString()}</td>
+                <td>{row.plannedPph}</td>
                 <td>{row.plannedHours.toFixed(1)}</td>
               </tr>
             ))}

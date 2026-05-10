@@ -41,9 +41,7 @@ function RiskPanel({ data, kpis, loading }) {
   const risk = getRiskLevel(data, kpis);
   const highOvertimeCount = data.filter(item => item.overtime_hours >= 6).length;
   const overtimeRate = data.length ? Math.round((highOvertimeCount / data.length) * 100) : 0;
-  const avgVolumePerRecord = data.length
-    ? Math.round((kpis.total_volume || 0) / data.length)
-    : 0;
+  const avgSortVolume = Math.round(kpis.avg_sort_volume || 0);
 
   return (
     <div className="risk-panel">
@@ -69,8 +67,8 @@ function RiskPanel({ data, kpis, loading }) {
           <strong>{overtimeRate}%</strong>
         </div>
         <div>
-          <span>Avg volume</span>
-          <strong>{avgVolumePerRecord.toLocaleString()}</strong>
+          <span>Avg shift volume</span>
+          <strong>{avgSortVolume.toLocaleString()}</strong>
         </div>
       </div>
     </div>

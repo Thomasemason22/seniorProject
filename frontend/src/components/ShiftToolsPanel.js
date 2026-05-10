@@ -33,7 +33,7 @@ function getBelts(group) {
 
 const initialForm = {
   date: new Date().toISOString().slice(0, 10),
-  shift: 'Night',
+  shift: 'Midnight',
   area_group: 'Outbounds',
   belt: 'PD 1',
   gross_volume: 11000,
@@ -139,7 +139,7 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
             <select name="shift" value={form.shift} onChange={updateForm}>
               <option>Day</option>
               <option>Twilight</option>
-              <option>Night</option>
+              <option>Midnight</option>
             </select>
           </label>
           <label>Group
@@ -162,10 +162,14 @@ function ShiftToolsPanel({ onCreateRecord, onBulkCreate, onExportCsv, onPrintRep
         </form>
 
         <div className="upload-card">
-          <strong>CSV Upload</strong>
-          <p>Use headers like date, shift, area_group, belt, gross_volume, scanned_volume, staffing_level, hours, overtime_hours, notes. Scanned volume is only applied to Outbounds.</p>
-          <input type="file" accept=".csv,text/csv" onChange={handleCsv} />
-          <span>{csvStatus || 'No CSV selected'}</span>
+          <div>
+            <strong>CSV Upload</strong>
+            <span>{csvStatus || 'No file selected'}</span>
+          </div>
+          <label className="file-button">
+            Choose CSV
+            <input type="file" accept=".csv,text/csv" onChange={handleCsv} />
+          </label>
         </div>
 
         <div className="calculator-card">

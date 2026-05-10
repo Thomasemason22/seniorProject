@@ -7,6 +7,7 @@ jest.mock('react-chartjs-2', () => ({
   Bar: () => <div data-testid="bar-chart" />,
   Doughnut: () => <div data-testid="doughnut-chart" />,
   Line: () => <div data-testid="line-chart" />,
+  Scatter: () => <div data-testid="scatter-chart" />,
 }));
 
 test('renders dashboard title', async () => {

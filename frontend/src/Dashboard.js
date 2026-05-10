@@ -18,6 +18,21 @@ import PlanActualPanel from './components/PlanActualPanel';
 import BeltDetailPanel from './components/BeltDetailPanel';
 import AlertsPanel from './components/AlertsPanel';
 import ProcessFlowPanel from './components/ProcessFlowPanel';
+import SortVolumeTrend from './components/SortVolumeTrend';
+import AreaMixChart from './components/AreaMixChart';
+import PDBeltHeatmap from './components/PDBeltHeatmap';
+import CapacityAnalysisPanel from './components/CapacityAnalysisPanel';
+import SortSummaryPanel from './components/SortSummaryPanel';
+import FlowComparisonChart from './components/FlowComparisonChart';
+import PDRankingPanel from './components/PDRankingPanel';
+import ForecastPanel from './components/ForecastPanel';
+import AnomalyPanel from './components/AnomalyPanel';
+import OutboundLoadRatePanel from './components/OutboundLoadRatePanel';
+import ShiftComparisonPanel from './components/ShiftComparisonPanel';
+import StaffingVolumeScatter from './components/StaffingVolumeScatter';
+import PPHDistributionChart from './components/PPHDistributionChart';
+import AreaEfficiencyPanel from './components/AreaEfficiencyPanel';
+import AreaStaffDetailPanel from './components/AreaStaffDetailPanel';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
@@ -25,10 +40,39 @@ function getUniqueValues(data, key) {
   return Array.from(new Set(data.map(item => item[key]))).sort();
 }
 
+function getSortTotals(data) {
+  const grouped = {};
+
+  data.forEach(item => {
+    const key = `${item.date}-${item.shift}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: item.date,
+        shift: item.shift,
+        volume: 0,
+        scanned: 0,
+        paidDay: 0,
+        plannedHours: 0,
+      };
+    }
+
+    grouped[key].volume += item.gross_volume || item.package_volume || 0;
+    grouped[key].scanned += item.scanned_volume || 0;
+    grouped[key].paidDay += item.paid_day || 0;
+    grouped[key].plannedHours += item.planned_hours || 0;
+  });
+
+  return Object.values(grouped);
+}
+
 function getSummary(data) {
   if (!data.length) {
     return {
       total_volume: 0,
+      avg_sort_volume: 0,
+      peak_sort_volume: 0,
+      sort_count: 0,
       avg_throughput: 0,
       avg_staffing: 0,
       total_overtime: 0,
@@ -52,10 +96,18 @@ function getSummary(data) {
   const totalOvertime = data.reduce((sum, item) => sum + item.overtime_hours, 0);
   const totalPaidDay = data.reduce((sum, item) => sum + (item.paid_day || 0), 0);
   const totalPlannedHours = data.reduce((sum, item) => sum + (item.planned_hours || 0), 0);
-  const peakVolume = Math.max(...data.map(item => item.package_volume));
+  const sortTotals = getSortTotals(data);
+  const sortVolumes = sortTotals.map(sort => sort.volume);
+  const avgSortVolume = sortVolumes.length
+    ? sortVolumes.reduce((sum, volume) => sum + volume, 0) / sortVolumes.length
+    : 0;
+  const peakSortVolume = sortVolumes.length ? Math.max(...sortVolumes) : 0;
 
   return {
     total_volume: totalVolume,
+    avg_sort_volume: avgSortVolume,
+    peak_sort_volume: peakSortVolume,
+    sort_count: sortTotals.length,
     total_scanned: totalScanned,
     outbound_gross_volume: outboundGrossVolume,
     avg_throughput: totalThroughput / data.length,
@@ -65,16 +117,17 @@ function getSummary(data) {
     avg_pph: data.reduce((sum, item) => sum + (item.actual_pph || 0), 0) / data.length,
     planned_hours: totalPlannedHours,
     records: data.length,
-    peak_volume: peakVolume,
+    peak_volume: peakSortVolume,
   };
 }
 
 function Dashboard() {
   const [operations, setOperations] = useState([]);
-  const [kpis, setKpis] = useState(getSummary([]));
   const [selectedBelt, setSelectedBelt] = useState('');
+  const [selectedArea, setSelectedArea] = useState('');
   const [role, setRole] = useState('Supervisor');
   const [filters, setFilters] = useState({
+    sort: 'All',
     shift: 'All',
     area: 'All',
     group: 'All',
@@ -88,13 +141,9 @@ function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [ops, kpiData] = await Promise.all([
-        axios.get(`${API_BASE_URL}/operations`),
-        axios.get(`${API_BASE_URL}/kpis`),
-      ]);
+      const ops = await axios.get(`${API_BASE_URL}/operations`);
 
       setOperations(ops.data);
-      setKpis(kpiData.data);
       setError('');
     } catch (requestError) {
       setError('Unable to load dashboard data. Make sure the Flask API is running.');
@@ -110,7 +159,11 @@ function Dashboard() {
   const shifts = getUniqueValues(operations, 'shift');
   const areas = getUniqueValues(operations, 'outbound_area');
   const groups = getUniqueValues(operations, 'area_group');
+  const sortOptions = getSortTotals(operations)
+    .sort((a, b) => `${b.date} ${b.shift}`.localeCompare(`${a.date} ${a.shift}`));
   const filteredOperations = operations.filter(item => {
+    const sortKey = `${item.date}-${item.shift}`;
+    const matchesSort = filters.sort === 'All' || sortKey === filters.sort;
     const matchesShift = filters.shift === 'All' || item.shift === filters.shift;
     const matchesArea = filters.area === 'All' || item.outbound_area === filters.area;
     const matchesGroup = filters.group === 'All' || item.area_group === filters.group;
@@ -119,19 +172,12 @@ function Dashboard() {
     const searchText = `${item.date} ${item.shift} ${item.outbound_area} ${item.area_group}`.toLowerCase();
     const matchesSearch = searchText.includes(filters.search.toLowerCase());
 
-    return matchesShift && matchesArea && matchesGroup && matchesDateFrom && matchesDateTo && matchesSearch;
+    return matchesSort && matchesShift && matchesArea && matchesGroup && matchesDateFrom && matchesDateTo && matchesSearch;
   });
-  const filtersAreDefault = filters.shift === 'All'
-    && filters.area === 'All'
-    && filters.group === 'All'
-    && !filters.dateFrom
-    && !filters.dateTo
-    && !filters.search;
-  const displayedKpis = filtersAreDefault
-    ? kpis
-    : getSummary(filteredOperations);
+  const displayedKpis = getSummary(filteredOperations);
   const resetFilters = () => {
     setFilters({
+      sort: 'All',
       shift: 'All',
       area: 'All',
       group: 'All',
@@ -144,13 +190,11 @@ function Dashboard() {
     const response = await axios.post(`${API_BASE_URL}/operations`, record);
     const nextOperations = [response.data, ...operations];
     setOperations(nextOperations);
-    setKpis(getSummary(nextOperations));
   };
   const bulkCreate = async records => {
     const response = await axios.post(`${API_BASE_URL}/operations/bulk`, records);
     const nextOperations = [...response.data, ...operations];
     setOperations(nextOperations);
-    setKpis(getSummary(nextOperations));
   };
   const exportCsv = () => {
     const headers = [
@@ -187,22 +231,30 @@ function Dashboard() {
     }
   }, [filteredOperations, selectedBelt]);
 
+  useEffect(() => {
+    if (filteredOperations.length && !filteredOperations.some(item => item.outbound_area === selectedArea || item.belt === selectedArea)) {
+      setSelectedArea(filteredOperations[0].outbound_area || filteredOperations[0].belt);
+    }
+  }, [filteredOperations, selectedArea]);
+
   return (
     <div className="dashboard-shell">
       <aside className="sidebar">
         <div className="brand-block">
-          <div className="brand-mark">OO</div>
+          <div className="brand-mark">UPS</div>
           <div>
-            <p className="eyebrow">OutboundOps</p>
+            <p className="eyebrow">UPS operations</p>
             <h1>Control Center</h1>
           </div>
         </div>
 
         <nav className="nav-stack" aria-label="Dashboard sections">
           <a href="#overview" className="active">Overview</a>
+          <a href="#sort-detail">Shift Detail</a>
           <a href="#tools">Tools</a>
           <a href="#report">Report</a>
           <a href="#trends">Trends</a>
+          <a href="#analysis">Analysis</a>
           <a href="#areas">Areas</a>
           <a href="#outbounds">Outbounds</a>
           <a href="#risk">Risk</a>
@@ -248,8 +300,23 @@ function Dashboard() {
         )}
 
         <section className="filter-panel" aria-label="Dashboard filters">
+          <label className="sort-control">
+            Specific Shift
+            <select
+              value={filters.sort}
+              onChange={event => setFilters({ ...filters, sort: event.target.value })}
+            >
+              <option value="All">All shifts</option>
+              {sortOptions.map(sort => (
+                <option key={`${sort.date}-${sort.shift}`} value={`${sort.date}-${sort.shift}`}>
+                  {sort.date} {sort.shift} - {Math.round(sort.volume).toLocaleString()}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label>
-            Shift
+            Shift Type
             <select
               value={filters.shift}
               onChange={event => setFilters({ ...filters, shift: event.target.value })}
@@ -322,6 +389,10 @@ function Dashboard() {
 
         <KPIcards kpis={displayedKpis} loading={loading} />
 
+        <section id="sort-detail">
+          <SortSummaryPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+        </section>
+
         {role !== 'Viewer' && (
           <ShiftToolsPanel
             onCreateRecord={createRecord}
@@ -352,14 +423,64 @@ function Dashboard() {
           <StaffingChart data={filteredOperations} loading={loading} />
         </section>
 
+        <section className="chart-grid secondary-grid" id="analysis">
+          <SortVolumeTrend data={filteredOperations} loading={loading} />
+          <CapacityAnalysisPanel data={filteredOperations} loading={loading} />
+        </section>
+
+        <section className="chart-grid secondary-grid">
+          <FlowComparisonChart data={filteredOperations} loading={loading} />
+          <ForecastPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+        </section>
+
+        <section className="chart-grid secondary-grid">
+          <StaffingVolumeScatter data={filteredOperations} loading={loading} />
+          <PPHDistributionChart data={filteredOperations} loading={loading} />
+        </section>
+
+        <section className="wide-grid">
+          <ShiftComparisonPanel data={filteredOperations} loading={loading} />
+          <AreaEfficiencyPanel data={filteredOperations} loading={loading} />
+        </section>
+
+        <section className="wide-grid">
+          <PDBeltHeatmap data={filteredOperations} loading={loading} />
+          <AreaMixChart data={filteredOperations} loading={loading} />
+        </section>
+
+        <section className="wide-grid">
+          <AnomalyPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+          <PDRankingPanel data={filteredOperations} loading={loading} />
+        </section>
+
         <section className="chart-grid secondary-grid" id="areas">
           <AreaPerformanceChart data={filteredOperations} loading={loading} />
-          <AreaLeaderboard data={filteredOperations} loading={loading} />
+          <AreaLeaderboard
+            data={filteredOperations}
+            loading={loading}
+            selectedArea={selectedArea}
+            onSelectArea={setSelectedArea}
+          />
+        </section>
+
+        <section className="wide-grid">
+          <AreaStaffDetailPanel
+            data={filteredOperations}
+            selectedArea={selectedArea}
+            onSelectArea={setSelectedArea}
+            loading={loading}
+          />
+          <AreaEfficiencyPanel data={filteredOperations} loading={loading} />
         </section>
 
         <section className="wide-grid" id="outbounds">
           <OutboundPerformancePanel data={filteredOperations} loading={loading} />
           <StaffingMatrix data={filteredOperations} loading={loading} />
+        </section>
+
+        <section className="wide-grid">
+          <OutboundLoadRatePanel data={filteredOperations} loading={loading} />
+          <PDRankingPanel data={filteredOperations} loading={loading} />
         </section>
 
         <section className="chart-grid secondary-grid" id="risk">

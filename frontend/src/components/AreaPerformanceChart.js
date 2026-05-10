@@ -23,6 +23,7 @@ ChartJS.register(
 
 function AreaPerformanceChart({ data, loading }) {
   const grouped = {};
+  const sorts = new Set();
 
   data.forEach(item => {
     if (!grouped[item.area_group]) {
@@ -30,16 +31,18 @@ function AreaPerformanceChart({ data, loading }) {
     }
 
     grouped[item.area_group] += item.gross_volume || item.package_volume;
+    sorts.add(`${item.date}-${item.shift}`);
   });
 
   const labels = Object.keys(grouped);
+  const sortCount = Math.max(1, sorts.size);
   const chartData = {
     labels,
     datasets: [
       {
-        label: 'Gross Volume by Area Group',
-        data: labels.map(label => grouped[label]),
-        backgroundColor: '#475569',
+        label: 'Average Shift Volume by Area Group',
+        data: labels.map(label => grouped[label] / sortCount),
+        backgroundColor: '#6b3a24',
         borderRadius: 6,
       },
     ],
@@ -56,6 +59,9 @@ function AreaPerformanceChart({ data, loading }) {
     },
     scales: {
       x: {
+        ticks: {
+          callback: value => `${Math.round(value / 1000)}k`,
+        },
         border: {
           display: false,
         },
@@ -73,7 +79,7 @@ function AreaPerformanceChart({ data, loading }) {
       <div className="panel-heading">
         <div>
           <p className="eyebrow">Area performance</p>
-          <h3>Volume by Area Group</h3>
+          <h3>Avg Shift Volume by Area</h3>
         </div>
         <span>{loading ? 'Loading' : `${labels.length} areas`}</span>
       </div>

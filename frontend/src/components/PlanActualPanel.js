@@ -1,11 +1,12 @@
 import React from 'react';
 
 function PlanActualPanel({ kpis }) {
+  const sortCount = Math.max(1, kpis.sort_count || 0);
   const rows = [
     {
-      label: 'Hours',
-      planned: kpis.planned_hours || 0,
-      actual: kpis.total_paid_day || 0,
+      label: 'Avg Hours/Shift',
+      planned: (kpis.planned_hours || 0) / sortCount,
+      actual: (kpis.total_paid_day || 0) / sortCount,
     },
     {
       label: 'PPH',
@@ -13,9 +14,9 @@ function PlanActualPanel({ kpis }) {
       actual: kpis.avg_pph || 0,
     },
     {
-      label: 'Outbound Scans',
-      planned: kpis.outbound_gross_volume || 0,
-      actual: kpis.total_scanned || 0,
+      label: 'Avg Outbound Scans',
+      planned: (kpis.outbound_gross_volume || 0) / sortCount,
+      actual: (kpis.total_scanned || 0) / sortCount,
     },
   ];
 

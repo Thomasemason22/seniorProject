@@ -17,13 +17,16 @@ ChartJS.register(
 
 function ShiftMixChart({ data, loading }) {
   const grouped = {};
+  const sortCounts = {};
 
   data.forEach(item => {
     if (!grouped[item.shift]) {
       grouped[item.shift] = 0;
+      sortCounts[item.shift] = new Set();
     }
 
     grouped[item.shift] += item.package_volume;
+    sortCounts[item.shift].add(`${item.date}-${item.shift}`);
   });
 
   const labels = Object.keys(grouped);
@@ -31,9 +34,9 @@ function ShiftMixChart({ data, loading }) {
     labels,
     datasets: [
       {
-        label: 'Volume Share',
-        data: labels.map(label => grouped[label]),
-        backgroundColor: ['#2563eb', '#0f766e', '#f59e0b', '#dc2626'],
+        label: 'Average Shift Volume',
+        data: labels.map(label => grouped[label] / Math.max(1, sortCounts[label].size)),
+        backgroundColor: ['#ffb500', '#351c15', '#177245', '#b42318'],
         borderWidth: 0,
       },
     ],
@@ -51,6 +54,11 @@ function ShiftMixChart({ data, loading }) {
           usePointStyle: true,
         },
       },
+      tooltip: {
+        callbacks: {
+          label: context => `${context.label}: ${Math.round(context.raw).toLocaleString()} avg packages`,
+        },
+      },
     },
   };
 
@@ -59,7 +67,7 @@ function ShiftMixChart({ data, loading }) {
       <div className="panel-heading">
         <div>
           <p className="eyebrow">Shift mix</p>
-          <h3>Volume Share by Shift</h3>
+          <h3>Avg Shift Volume</h3>
         </div>
         <span>{loading ? 'Loading' : `${labels.length} shifts`}</span>
       </div>

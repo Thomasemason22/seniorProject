@@ -1,6 +1,6 @@
 import React from 'react';
 
-function AreaLeaderboard({ data, loading }) {
+function AreaLeaderboard({ data, loading, selectedArea, onSelectArea }) {
   const grouped = {};
 
   data.forEach(item => {
@@ -40,14 +40,19 @@ function AreaLeaderboard({ data, loading }) {
 
       <div className="leaderboard-list">
         {rows.map(row => (
-          <div className="leaderboard-row" key={row.area}>
+          <button
+            className={`leaderboard-row ${selectedArea === row.area ? 'selected' : ''}`}
+            key={row.area}
+            type="button"
+            onClick={() => onSelectArea(row.area)}
+          >
             <div>
               <strong>{row.area}</strong>
               <span>{row.records} records · {row.avgOvertime.toFixed(1)} avg OT</span>
             </div>
             <em>{row.volume.toLocaleString()}</em>
             <i style={{ width: `${(row.volume / maxVolume) * 100}%` }} />
-          </div>
+          </button>
         ))}
       </div>
 

@@ -2,8 +2,8 @@ import React from 'react';
 
 const cards = [
   {
-    label: 'Total Volume',
-    key: 'total_volume',
+    label: 'Avg Shift Volume',
+    key: 'avg_sort_volume',
     accent: 'blue',
     formatter: value => Math.round(value || 0).toLocaleString(),
   },
@@ -26,14 +26,14 @@ const cards = [
     formatter: value => Math.round(value || 0).toLocaleString(),
   },
   {
-    label: 'Records',
-    key: 'records',
+    label: 'Shifts',
+    key: 'sort_count',
     accent: 'slate',
     formatter: value => Math.round(value || 0).toLocaleString(),
   },
   {
-    label: 'Peak Volume',
-    key: 'peak_volume',
+    label: 'Peak Shift Volume',
+    key: 'peak_sort_volume',
     accent: 'purple',
     formatter: value => Math.round(value || 0).toLocaleString(),
   },

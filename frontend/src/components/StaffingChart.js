@@ -43,7 +43,7 @@ function StaffingChart({ data }) {
       {
         label: 'Average Staffing',
         data: labels.map(shift => Math.round(grouped[shift] / counts[shift])),
-        backgroundColor: ['#0f766e', '#2563eb', '#f59e0b', '#dc2626'],
+        backgroundColor: ['#ffb500', '#351c15', '#177245', '#b42318'],
         borderRadius: 6,
         borderWidth: 1,
       },
