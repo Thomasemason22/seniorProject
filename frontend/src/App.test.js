@@ -19,4 +19,5 @@ test('renders dashboard title', async () => {
   });
 
   expect(heading).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /forecasting/i })).toBeInTheDocument();
 });

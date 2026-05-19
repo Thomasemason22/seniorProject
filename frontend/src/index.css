@@ -244,6 +244,7 @@ button {
 .kpi-grid,
 .chart-grid,
 .secondary-grid,
+.volume-forecast-section,
 .tools-panel,
 .report-panel,
 .plan-panel,
@@ -797,6 +798,168 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 12px;
+}
+
+.volume-forecast-section {
+  scroll-margin-top: 20px;
+}
+
+.forecast-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.forecast-kpi-grid article,
+.forecast-table-card {
+  min-width: 0;
+  padding: 14px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.forecast-kpi-grid span,
+.forecast-kpi-grid strong,
+.forecast-kpi-grid em {
+  display: block;
+}
+
+.forecast-kpi-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.forecast-kpi-grid strong {
+  margin-top: 6px;
+  font-size: 24px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.forecast-kpi-grid em {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.forecast-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.forecast-chart {
+  box-shadow: none;
+}
+
+.forecast-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.forecast-table {
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.forecast-table table {
+  min-width: 420px;
+}
+
+.forecast-table th,
+.forecast-table td {
+  padding: 10px;
+  font-size: 13px;
+}
+
+.weekly-volume-list {
+  display: grid;
+  gap: 10px;
+}
+
+.weekly-volume-list div {
+  position: relative;
+  min-height: 62px;
+  padding: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.weekly-volume-list span,
+.weekly-volume-list strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.weekly-volume-list span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.weekly-volume-list strong {
+  margin-top: 5px;
+  font-size: 18px;
+}
+
+.weekly-volume-list i {
+  position: absolute;
+  inset: auto auto 0 0;
+  height: 5px;
+  background: var(--ups-gold);
+}
+
+.forecast-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.forecast-metrics div {
+  min-width: 0;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.forecast-metrics dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.forecast-metrics dd {
+  margin: 5px 0 0;
+  font-size: 18px;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.forecast-factor-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .scenario-list,
@@ -1570,7 +1733,9 @@ td {
   .wide-grid,
   .recommendation-grid,
   .tools-grid,
-  .process-steps {
+  .process-steps,
+  .forecast-layout,
+  .forecast-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1593,9 +1758,10 @@ td {
   }
 
   .forecast-current,
+  .forecast-kpi-grid,
   .ranking-columns,
   .staff-summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1627,7 +1793,11 @@ td {
   .calculator-card dl,
   .process-steps,
   .risk-stats,
-  .staffing-grid {
+  .staffing-grid,
+  .forecast-layout,
+  .forecast-detail-grid,
+  .forecast-kpi-grid,
+  .forecast-current {
     grid-template-columns: 1fr;
   }
 

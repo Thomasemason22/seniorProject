@@ -255,6 +255,7 @@ function Dashboard() {
           <a href="#report">Report</a>
           <a href="#trends">Trends</a>
           <a href="#analysis">Analysis</a>
+          <a href="#volume-forecasting">Forecasting</a>
           <a href="#areas">Areas</a>
           <a href="#outbounds">Outbounds</a>
           <a href="#risk">Risk</a>
@@ -430,12 +431,14 @@ function Dashboard() {
 
         <section className="chart-grid secondary-grid">
           <FlowComparisonChart data={filteredOperations} loading={loading} />
-          <ForecastPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+          <StaffingVolumeScatter data={filteredOperations} loading={loading} />
         </section>
 
+        <ForecastPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+
         <section className="chart-grid secondary-grid">
-          <StaffingVolumeScatter data={filteredOperations} loading={loading} />
           <PPHDistributionChart data={filteredOperations} loading={loading} />
+          <ShiftMixChart data={filteredOperations} loading={loading} />
         </section>
 
         <section className="wide-grid">
@@ -484,7 +487,6 @@ function Dashboard() {
         </section>
 
         <section className="chart-grid secondary-grid" id="risk">
-          <ShiftMixChart data={filteredOperations} loading={loading} />
           <RiskPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
         </section>
 
