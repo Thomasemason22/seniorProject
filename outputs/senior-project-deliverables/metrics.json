@@ -1,0 +1,313 @@
+{
+  "records": 3420,
+  "date_from": "2026-02-28",
+  "date_to": "2026-03-29",
+  "total_volume": 17253457,
+  "outbound_volume": 9489535,
+  "scanned": 8440611,
+  "scan_rate": 0.8894651845427621,
+  "paid": 326352.47,
+  "planned": 65107.13,
+  "overtime": 2984.33,
+  "avg_pph": 60.26092397660818,
+  "avg_staffing": 12.784502923976609,
+  "sort_count": 90,
+  "avg_sort_volume": 191705.07777777777,
+  "peak_sort_volume": 284949,
+  "groups": [
+    {
+      "name": "Outbounds",
+      "records": 1620,
+      "volume": 9489535,
+      "share": 0.5500077462736888,
+      "avg_pph": 80.86264197530863,
+      "overtime": 1293.8699999999985
+    },
+    {
+      "name": "Unload",
+      "records": 540,
+      "volume": 3450721,
+      "share": 0.20000171559821317,
+      "avg_pph": 34.56783333333333,
+      "overtime": 599.4899999999997
+    },
+    {
+      "name": "Sort Aisle",
+      "records": 540,
+      "volume": 1725334,
+      "share": 0.0999993218750306,
+      "avg_pph": 32.746685185185186,
+      "overtime": 509.0199999999996
+    },
+    {
+      "name": "Airsort",
+      "records": 90,
+      "volume": 690111,
+      "share": 0.039998418867592735,
+      "avg_pph": 92.51444444444444,
+      "overtime": 67.44000000000001
+    },
+    {
+      "name": "Small Sort",
+      "records": 90,
+      "volume": 690111,
+      "share": 0.039998418867592735,
+      "avg_pph": 72.84077777777777,
+      "overtime": 77.10000000000002
+    },
+    {
+      "name": "Metro",
+      "records": 360,
+      "volume": 690111,
+      "share": 0.039998418867592735,
+      "avg_pph": 33.42805555555556,
+      "overtime": 286.6399999999999
+    },
+    {
+      "name": "Irregulars",
+      "records": 90,
+      "volume": 345036,
+      "share": 0.01999807922551405,
+      "avg_pph": 91.22133333333333,
+      "overtime": 76.58000000000001
+    },
+    {
+      "name": "Indirect",
+      "records": 90,
+      "volume": 172498,
+      "share": 0.009997880424775162,
+      "avg_pph": 40.211666666666666,
+      "overtime": 74.19
+    }
+  ],
+  "belts": [
+    {
+      "name": "Airsort",
+      "volume": 690111,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 86.0749405055902
+    },
+    {
+      "name": "Small Sort",
+      "volume": 690111,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 65.71697110632437
+    },
+    {
+      "name": "UL 6",
+      "volume": 579546,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 33.492954034785996
+    },
+    {
+      "name": "UL 1",
+      "volume": 578847,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 33.13923531755665
+    },
+    {
+      "name": "UL 4",
+      "volume": 573499,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 33.42627817123261
+    },
+    {
+      "name": "UL 5",
+      "volume": 573471,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 33.20006321935903
+    },
+    {
+      "name": "UL 3",
+      "volume": 572985,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 32.87160805461535
+    },
+    {
+      "name": "UL 2",
+      "volume": 572373,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 33.37409082798938
+    },
+    {
+      "name": "PD 3",
+      "volume": 534539,
+      "scan_rate": 0.8928964958590486,
+      "packages_per_paid_hour": 87.1757445684259
+    },
+    {
+      "name": "PD 15",
+      "volume": 533433,
+      "scan_rate": 0.8863324916156293,
+      "packages_per_paid_hour": 84.75652675448978
+    },
+    {
+      "name": "PD 1",
+      "volume": 530879,
+      "scan_rate": 0.8946746810478471,
+      "packages_per_paid_hour": 84.64094334779416
+    },
+    {
+      "name": "PD 11",
+      "volume": 529624,
+      "scan_rate": 0.8941645393713276,
+      "packages_per_paid_hour": 92.90377807949088
+    },
+    {
+      "name": "PD 13",
+      "volume": 529083,
+      "scan_rate": 0.8831638892196498,
+      "packages_per_paid_hour": 82.04808907566935
+    },
+    {
+      "name": "PD 5",
+      "volume": 528474,
+      "scan_rate": 0.8826205262699773,
+      "packages_per_paid_hour": 82.5741915221743
+    },
+    {
+      "name": "PD 4",
+      "volume": 528016,
+      "scan_rate": 0.8810092875973455,
+      "packages_per_paid_hour": 84.44148766040202
+    },
+    {
+      "name": "PD 16",
+      "volume": 527788,
+      "scan_rate": 0.8898042395810439,
+      "packages_per_paid_hour": 83.67745239329614
+    },
+    {
+      "name": "PD 17",
+      "volume": 527708,
+      "scan_rate": 0.8877996922540495,
+      "packages_per_paid_hour": 82.46339443376621
+    },
+    {
+      "name": "PD 8",
+      "volume": 527199,
+      "scan_rate": 0.8882736879242943,
+      "packages_per_paid_hour": 81.64906015124927
+    },
+    {
+      "name": "PD 7",
+      "volume": 526368,
+      "scan_rate": 0.8870505045899447,
+      "packages_per_paid_hour": 84.11834175793089
+    },
+    {
+      "name": "PD 12",
+      "volume": 525772,
+      "scan_rate": 0.8880408237791286,
+      "packages_per_paid_hour": 82.78857085271414
+    },
+    {
+      "name": "PD 10",
+      "volume": 525735,
+      "scan_rate": 0.8896972809495278,
+      "packages_per_paid_hour": 79.15037570213616
+    },
+    {
+      "name": "PD 2",
+      "volume": 525280,
+      "scan_rate": 0.8916977611940299,
+      "packages_per_paid_hour": 80.32160447481618
+    },
+    {
+      "name": "PD 14",
+      "volume": 525082,
+      "scan_rate": 0.8888002254885904,
+      "packages_per_paid_hour": 84.86667507119607
+    },
+    {
+      "name": "PD 6",
+      "volume": 524919,
+      "scan_rate": 0.8974813256902493,
+      "packages_per_paid_hour": 83.20491381018431
+    },
+    {
+      "name": "PD 18",
+      "volume": 520445,
+      "scan_rate": 0.8922518229591984,
+      "packages_per_paid_hour": 80.620401208272
+    },
+    {
+      "name": "PD 9",
+      "volume": 519191,
+      "scan_rate": 0.8947477903122357,
+      "packages_per_paid_hour": 81.21534170633383
+    },
+    {
+      "name": "Irregulars",
+      "volume": 345036,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 83.36115775359077
+    },
+    {
+      "name": "SRT 1",
+      "volume": 288430,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 29.94314094132523
+    },
+    {
+      "name": "SRT 4",
+      "volume": 288288,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 31.423741117763807
+    },
+    {
+      "name": "SRT 5",
+      "volume": 287853,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 29.456887579934946
+    },
+    {
+      "name": "SRT 2",
+      "volume": 287587,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 31.034255770085768
+    },
+    {
+      "name": "SRT 3",
+      "volume": 286715,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 29.54874308469853
+    },
+    {
+      "name": "SRT 6",
+      "volume": 286461,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 27.19637028555805
+    },
+    {
+      "name": "Metro 1",
+      "volume": 172990,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 29.120493427309878
+    },
+    {
+      "name": "Metro 3",
+      "volume": 172827,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 31.274225595257487
+    },
+    {
+      "name": "Indirect",
+      "volume": 172498,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 35.32717438719441
+    },
+    {
+      "name": "Metro 4",
+      "volume": 172302,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 29.090178506608947
+    },
+    {
+      "name": "Metro 2",
+      "volume": 171992,
+      "scan_rate": 0,
+      "packages_per_paid_hour": 29.858115275045964
+    }
+  ]
+}
