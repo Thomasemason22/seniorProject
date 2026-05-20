@@ -19,5 +19,9 @@ test('renders dashboard title', async () => {
   });
 
   expect(heading).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /forecasting/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /forecasting/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /slic trainer/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /import center/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /trailer cube/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /ai companion/i })).toBeInTheDocument();
 });

@@ -33,8 +33,12 @@ import StaffingVolumeScatter from './components/StaffingVolumeScatter';
 import PPHDistributionChart from './components/PPHDistributionChart';
 import AreaEfficiencyPanel from './components/AreaEfficiencyPanel';
 import AreaStaffDetailPanel from './components/AreaStaffDetailPanel';
+import SlicTrainingPanel from './components/SlicTrainingPanel';
+import ImportCenterPanel from './components/ImportCenterPanel';
+import TrailerCubePanel from './components/TrailerCubePanel';
+import AiCompanionPanel from './components/AiCompanionPanel';
 
-const API_BASE_URL = 'http://127.0.0.1:5000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5050`;
 
 function getUniqueValues(data, key) {
   return Array.from(new Set(data.map(item => item[key]))).sort();
@@ -123,8 +127,10 @@ function getSummary(data) {
 
 function Dashboard() {
   const [operations, setOperations] = useState([]);
+  const [trailerCubeRecords, setTrailerCubeRecords] = useState([]);
   const [selectedBelt, setSelectedBelt] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
+  const [activePage, setActivePage] = useState('overview');
   const [role, setRole] = useState('Supervisor');
   const [filters, setFilters] = useState({
     sort: 'All',
@@ -141,9 +147,13 @@ function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const ops = await axios.get(`${API_BASE_URL}/operations`);
+      const [ops, trailerCube] = await Promise.all([
+        axios.get(`${API_BASE_URL}/operations`),
+        axios.get(`${API_BASE_URL}/trailer-cube`),
+      ]);
 
       setOperations(ops.data);
+      setTrailerCubeRecords(trailerCube.data);
       setError('');
     } catch (requestError) {
       setError('Unable to load dashboard data. Make sure the Flask API is running.');
@@ -196,6 +206,11 @@ function Dashboard() {
     const nextOperations = [...response.data, ...operations];
     setOperations(nextOperations);
   };
+  const bulkCreateTrailerCube = async records => {
+    const response = await axios.post(`${API_BASE_URL}/trailer-cube/bulk`, records);
+    const nextRecords = [...response.data, ...trailerCubeRecords];
+    setTrailerCubeRecords(nextRecords);
+  };
   const exportCsv = () => {
     const headers = [
       'date',
@@ -237,6 +252,180 @@ function Dashboard() {
     }
   }, [filteredOperations, selectedArea]);
 
+  const pages = [
+    { id: 'overview', label: 'Overview', eyebrow: 'Warehouse analytics', title: 'Operations Dashboard', copy: 'Monitor package flow, staffing pressure, overtime load, and area performance.' },
+    { id: 'sort-detail', label: 'Shift Detail', eyebrow: 'Sort detail', title: 'Shift Detail', copy: 'Review selected shift totals, belt detail, alerts, and package flow.' },
+    { id: 'slic-training', label: 'SLIC Trainer', eyebrow: 'Sort aisle training', title: 'SLIC Trainer', copy: 'Practice reading dummy UPS labels and choosing the right belt/transverse side.' },
+    { id: 'import-center', label: 'Import Center', eyebrow: 'CSV imports', title: 'Import Center', copy: 'Upload operations KPI and trailer cube CSVs, preview rows, and import data.' },
+    { id: 'trailer-cube', label: 'Trailer Cube', eyebrow: 'Cube utilization', title: 'Trailer Cube Utilization', copy: 'Track used cube, trailer capacity, load quality, and low-cube opportunities.' },
+    { id: 'ai-companion', label: 'AI Companion', eyebrow: 'Ops companion', title: 'AI Ops Companion', copy: 'Ask operational questions about volume, staffing, forecasting, trailer cube, and risk.' },
+    { id: 'tools', label: 'Tools', eyebrow: 'Shift tools', title: 'Entry and Reporting Tools', copy: 'Add records, upload CSV files, export filtered data, and print reports.' },
+    { id: 'report', label: 'Report', eyebrow: 'Daily report', title: 'Daily Operations Report', copy: 'Summarize plan versus actual performance and shift notes.' },
+    { id: 'trends', label: 'Trends', eyebrow: 'Volume trends', title: 'Volume and Staffing Trends', copy: 'Track package volume, staffing coverage, and throughput patterns.' },
+    { id: 'analysis', label: 'Analysis', eyebrow: 'Operations analysis', title: 'Capacity and Flow Analysis', copy: 'Compare sort volume, building capacity, flow mix, and productivity distribution.' },
+    { id: 'volume-forecasting', label: 'Forecasting', eyebrow: 'Volume forecasting', title: 'Package Flow Forecasting', copy: 'Project upcoming volume, compare actual versus predicted results, and plan labor.' },
+    { id: 'areas', label: 'Areas', eyebrow: 'Area performance', title: 'Area Performance', copy: 'Compare area productivity, staffing, and efficiency.' },
+    { id: 'outbounds', label: 'Outbounds', eyebrow: 'Outbound operations', title: 'Outbound Performance', copy: 'Review PD performance, staffing balance, load rates, and outbound rankings.' },
+    { id: 'risk', label: 'Risk', eyebrow: 'Risk monitoring', title: 'Risk and Recommendations', copy: 'Surface risk signals, anomalies, and recommended actions.' },
+    { id: 'records', label: 'Records', eyebrow: 'Raw records', title: 'Operations Records', copy: 'Inspect the filtered operation records used across the dashboard.' },
+  ];
+  const currentPage = pages.find(page => page.id === activePage) || pages[0];
+  const showFilters = !['slic-training', 'import-center', 'ai-companion'].includes(activePage);
+  const showKpis = ['overview', 'sort-detail', 'report', 'trends', 'analysis', 'volume-forecasting', 'areas', 'outbounds', 'risk', 'records'].includes(activePage);
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'overview':
+        return (
+          <>
+            <section className="chart-grid">
+              <VolumeChart data={filteredOperations} loading={loading} />
+              <StaffingChart data={filteredOperations} loading={loading} />
+            </section>
+            <RecommendationsPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+          </>
+        );
+      case 'sort-detail':
+        return (
+          <>
+            <SortSummaryPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+            <ProcessFlowPanel />
+            <section className="wide-grid">
+              <BeltDetailPanel
+                data={filteredOperations}
+                selectedBelt={selectedBelt}
+                onSelectBelt={setSelectedBelt}
+              />
+              <AlertsPanel data={filteredOperations} />
+            </section>
+          </>
+        );
+      case 'slic-training':
+        return <SlicTrainingPanel />;
+      case 'import-center':
+        return (
+          <ImportCenterPanel
+            onBulkCreateOperations={bulkCreate}
+            onBulkCreateTrailerCube={bulkCreateTrailerCube}
+          />
+        );
+      case 'trailer-cube':
+        return <TrailerCubePanel records={trailerCubeRecords} loading={loading} />;
+      case 'ai-companion':
+        return (
+          <AiCompanionPanel
+            kpis={displayedKpis}
+            operations={filteredOperations}
+            trailerCubeRecords={trailerCubeRecords}
+          />
+        );
+      case 'tools':
+        return role !== 'Viewer' ? (
+          <ShiftToolsPanel
+            onCreateRecord={createRecord}
+            onBulkCreate={bulkCreate}
+            onExportCsv={exportCsv}
+            onPrintReport={printReport}
+          />
+        ) : (
+          <div className="empty-state">Switch to Supervisor or Admin to use entry and export tools.</div>
+        );
+      case 'report':
+        return (
+          <section className="wide-grid report-layout">
+            <DailyReportPanel data={filteredOperations} kpis={displayedKpis} />
+            <PlanActualPanel kpis={displayedKpis} />
+          </section>
+        );
+      case 'trends':
+        return (
+          <>
+            <section className="chart-grid">
+              <VolumeChart data={filteredOperations} loading={loading} />
+              <StaffingChart data={filteredOperations} loading={loading} />
+            </section>
+            <section className="chart-grid secondary-grid">
+              <PPHDistributionChart data={filteredOperations} loading={loading} />
+              <ShiftMixChart data={filteredOperations} loading={loading} />
+            </section>
+          </>
+        );
+      case 'analysis':
+        return (
+          <>
+            <section className="chart-grid secondary-grid">
+              <SortVolumeTrend data={filteredOperations} loading={loading} />
+              <CapacityAnalysisPanel data={filteredOperations} loading={loading} />
+            </section>
+            <section className="chart-grid secondary-grid">
+              <FlowComparisonChart data={filteredOperations} loading={loading} />
+              <StaffingVolumeScatter data={filteredOperations} loading={loading} />
+            </section>
+            <section className="wide-grid">
+              <ShiftComparisonPanel data={filteredOperations} loading={loading} />
+              <PDRankingPanel data={filteredOperations} loading={loading} />
+            </section>
+          </>
+        );
+      case 'volume-forecasting':
+        return <ForecastPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />;
+      case 'areas':
+        return (
+          <>
+            <section className="chart-grid secondary-grid">
+              <AreaPerformanceChart data={filteredOperations} loading={loading} />
+              <AreaLeaderboard
+                data={filteredOperations}
+                loading={loading}
+                selectedArea={selectedArea}
+                onSelectArea={setSelectedArea}
+              />
+            </section>
+            <section className="wide-grid">
+              <AreaStaffDetailPanel
+                data={filteredOperations}
+                selectedArea={selectedArea}
+                onSelectArea={setSelectedArea}
+                loading={loading}
+              />
+              <AreaEfficiencyPanel data={filteredOperations} loading={loading} />
+            </section>
+            <section className="wide-grid">
+              <PDBeltHeatmap data={filteredOperations} loading={loading} />
+              <AreaMixChart data={filteredOperations} loading={loading} />
+            </section>
+          </>
+        );
+      case 'outbounds':
+        return (
+          <>
+            <section className="wide-grid">
+              <OutboundPerformancePanel data={filteredOperations} loading={loading} />
+              <StaffingMatrix data={filteredOperations} loading={loading} />
+            </section>
+            <section className="wide-grid">
+              <OutboundLoadRatePanel data={filteredOperations} loading={loading} />
+              <PDRankingPanel data={filteredOperations} loading={loading} />
+            </section>
+          </>
+        );
+      case 'risk':
+        return (
+          <>
+            <section className="chart-grid secondary-grid">
+              <RiskPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+              <AnomalyPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+            </section>
+            <RecommendationsPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
+          </>
+        );
+      case 'records':
+        return <OperationsTable data={filteredOperations} loading={loading} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="dashboard-shell">
       <aside className="sidebar">
@@ -249,17 +438,16 @@ function Dashboard() {
         </div>
 
         <nav className="nav-stack" aria-label="Dashboard sections">
-          <a href="#overview" className="active">Overview</a>
-          <a href="#sort-detail">Shift Detail</a>
-          <a href="#tools">Tools</a>
-          <a href="#report">Report</a>
-          <a href="#trends">Trends</a>
-          <a href="#analysis">Analysis</a>
-          <a href="#volume-forecasting">Forecasting</a>
-          <a href="#areas">Areas</a>
-          <a href="#outbounds">Outbounds</a>
-          <a href="#risk">Risk</a>
-          <a href="#records">Records</a>
+          {pages.map(page => (
+            <button
+              className={activePage === page.id ? 'active' : ''}
+              key={page.id}
+              type="button"
+              onClick={() => setActivePage(page.id)}
+            >
+              {page.label}
+            </button>
+          ))}
         </nav>
 
         <div className="sidebar-note">
@@ -280,13 +468,11 @@ function Dashboard() {
       </aside>
 
       <main className="dashboard-main">
-        <section className="topbar" id="overview">
+        <section className="topbar">
           <div>
-            <p className="eyebrow">Warehouse analytics</p>
-            <h2>Operations Dashboard</h2>
-            <p className="summary-copy">
-              Monitor package flow, staffing pressure, overtime load, and area performance.
-            </p>
+            <p className="eyebrow">{currentPage.eyebrow}</p>
+            <h2>{currentPage.title}</h2>
+            <p className="summary-copy">{currentPage.copy}</p>
           </div>
           <div className="status-pill">
             <span className={error ? 'status-dot warning' : 'status-dot'} />
@@ -300,199 +486,101 @@ function Dashboard() {
           </div>
         )}
 
-        <section className="filter-panel" aria-label="Dashboard filters">
-          <label className="sort-control">
-            Specific Shift
-            <select
-              value={filters.sort}
-              onChange={event => setFilters({ ...filters, sort: event.target.value })}
-            >
-              <option value="All">All shifts</option>
-              {sortOptions.map(sort => (
-                <option key={`${sort.date}-${sort.shift}`} value={`${sort.date}-${sort.shift}`}>
-                  {sort.date} {sort.shift} - {Math.round(sort.volume).toLocaleString()}
-                </option>
-              ))}
-            </select>
-          </label>
+        {showFilters && (
+          <section className="filter-panel" aria-label="Dashboard filters">
+            <label className="sort-control">
+              Specific Shift
+              <select
+                value={filters.sort}
+                onChange={event => setFilters({ ...filters, sort: event.target.value })}
+              >
+                <option value="All">All shifts</option>
+                {sortOptions.map(sort => (
+                  <option key={`${sort.date}-${sort.shift}`} value={`${sort.date}-${sort.shift}`}>
+                    {sort.date} {sort.shift} - {Math.round(sort.volume).toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Shift Type
-            <select
-              value={filters.shift}
-              onChange={event => setFilters({ ...filters, shift: event.target.value })}
-            >
-              <option>All</option>
-              {shifts.map(shift => (
-                <option key={shift}>{shift}</option>
-              ))}
-            </select>
-          </label>
+            <label>
+              Shift Type
+              <select
+                value={filters.shift}
+                onChange={event => setFilters({ ...filters, shift: event.target.value })}
+              >
+                <option>All</option>
+                {shifts.map(shift => (
+                  <option key={shift}>{shift}</option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Group
-            <select
-              value={filters.group}
-              onChange={event => setFilters({ ...filters, group: event.target.value })}
-            >
-              <option>All</option>
-              {groups.map(group => (
-                <option key={group}>{group}</option>
-              ))}
-            </select>
-          </label>
+            <label>
+              Group
+              <select
+                value={filters.group}
+                onChange={event => setFilters({ ...filters, group: event.target.value })}
+              >
+                <option>All</option>
+                {groups.map(group => (
+                  <option key={group}>{group}</option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Area
-            <select
-              value={filters.area}
-              onChange={event => setFilters({ ...filters, area: event.target.value })}
-            >
-              <option>All</option>
-              {areas.map(area => (
-                <option key={area}>{area}</option>
-              ))}
-            </select>
-          </label>
+            <label>
+              Area
+              <select
+                value={filters.area}
+                onChange={event => setFilters({ ...filters, area: event.target.value })}
+              >
+                <option>All</option>
+                {areas.map(area => (
+                  <option key={area}>{area}</option>
+                ))}
+              </select>
+            </label>
 
-          <label className="search-control">
-            Search
-            <input
-              type="search"
-              value={filters.search}
-              placeholder="Date, shift, or area"
-              onChange={event => setFilters({ ...filters, search: event.target.value })}
-            />
-          </label>
+            <label className="search-control">
+              Search
+              <input
+                type="search"
+                value={filters.search}
+                placeholder="Date, shift, or area"
+                onChange={event => setFilters({ ...filters, search: event.target.value })}
+              />
+            </label>
 
-          <label>
-            From
-            <input
-              type="date"
-              value={filters.dateFrom}
-              onChange={event => setFilters({ ...filters, dateFrom: event.target.value })}
-            />
-          </label>
+            <label>
+              From
+              <input
+                type="date"
+                value={filters.dateFrom}
+                onChange={event => setFilters({ ...filters, dateFrom: event.target.value })}
+              />
+            </label>
 
-          <label>
-            To
-            <input
-              type="date"
-              value={filters.dateTo}
-              onChange={event => setFilters({ ...filters, dateTo: event.target.value })}
-            />
-          </label>
+            <label>
+              To
+              <input
+                type="date"
+                value={filters.dateTo}
+                onChange={event => setFilters({ ...filters, dateTo: event.target.value })}
+              />
+            </label>
 
-          <button className="reset-button" type="button" onClick={resetFilters}>
-            Reset
-          </button>
-        </section>
-
-        <KPIcards kpis={displayedKpis} loading={loading} />
-
-        <section id="sort-detail">
-          <SortSummaryPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
-        </section>
-
-        {role !== 'Viewer' && (
-          <ShiftToolsPanel
-            onCreateRecord={createRecord}
-            onBulkCreate={bulkCreate}
-            onExportCsv={exportCsv}
-            onPrintReport={printReport}
-          />
+            <button className="reset-button" type="button" onClick={resetFilters}>
+              Reset
+            </button>
+          </section>
         )}
 
-        <section className="wide-grid report-layout">
-          <DailyReportPanel data={filteredOperations} kpis={displayedKpis} />
-          <PlanActualPanel kpis={displayedKpis} />
-        </section>
+        {showKpis && <KPIcards kpis={displayedKpis} loading={loading} />}
 
-        <ProcessFlowPanel />
-
-        <section className="wide-grid">
-          <BeltDetailPanel
-            data={filteredOperations}
-            selectedBelt={selectedBelt}
-            onSelectBelt={setSelectedBelt}
-          />
-          <AlertsPanel data={filteredOperations} />
-        </section>
-
-        <section className="chart-grid" id="trends">
-          <VolumeChart data={filteredOperations} loading={loading} />
-          <StaffingChart data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="chart-grid secondary-grid" id="analysis">
-          <SortVolumeTrend data={filteredOperations} loading={loading} />
-          <CapacityAnalysisPanel data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="chart-grid secondary-grid">
-          <FlowComparisonChart data={filteredOperations} loading={loading} />
-          <StaffingVolumeScatter data={filteredOperations} loading={loading} />
-        </section>
-
-        <ForecastPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
-
-        <section className="chart-grid secondary-grid">
-          <PPHDistributionChart data={filteredOperations} loading={loading} />
-          <ShiftMixChart data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="wide-grid">
-          <ShiftComparisonPanel data={filteredOperations} loading={loading} />
-          <AreaEfficiencyPanel data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="wide-grid">
-          <PDBeltHeatmap data={filteredOperations} loading={loading} />
-          <AreaMixChart data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="wide-grid">
-          <AnomalyPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
-          <PDRankingPanel data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="chart-grid secondary-grid" id="areas">
-          <AreaPerformanceChart data={filteredOperations} loading={loading} />
-          <AreaLeaderboard
-            data={filteredOperations}
-            loading={loading}
-            selectedArea={selectedArea}
-            onSelectArea={setSelectedArea}
-          />
-        </section>
-
-        <section className="wide-grid">
-          <AreaStaffDetailPanel
-            data={filteredOperations}
-            selectedArea={selectedArea}
-            onSelectArea={setSelectedArea}
-            loading={loading}
-          />
-          <AreaEfficiencyPanel data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="wide-grid" id="outbounds">
-          <OutboundPerformancePanel data={filteredOperations} loading={loading} />
-          <StaffingMatrix data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="wide-grid">
-          <OutboundLoadRatePanel data={filteredOperations} loading={loading} />
-          <PDRankingPanel data={filteredOperations} loading={loading} />
-        </section>
-
-        <section className="chart-grid secondary-grid" id="risk">
-          <RiskPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
-        </section>
-
-        <RecommendationsPanel data={filteredOperations} kpis={displayedKpis} loading={loading} />
-
-        <OperationsTable data={filteredOperations} loading={loading} />
+        <div className="page-content">
+          {renderPage()}
+        </div>
       </main>
     </div>
   );

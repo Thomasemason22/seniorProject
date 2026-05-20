@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from analytics import calculate_kpis
-from models import WarehouseOperation, db
+from models import TrailerCubeRecord, WarehouseOperation, db
 
 
 app = Flask(__name__)
@@ -67,6 +67,26 @@ def build_operation(payload):
     )
 
 
+def build_trailer_cube_record(payload):
+    used_cube = float(payload.get("used_cube") or payload.get("cube_used") or 0)
+    trailer_capacity = float(payload.get("trailer_capacity") or payload.get("capacity_cube") or payload.get("capacity") or 0)
+
+    return TrailerCubeRecord(
+        date=payload.get("date"),
+        shift=payload.get("shift"),
+        trailer_id=payload.get("trailer_id") or payload.get("trailer") or payload.get("load_id"),
+        destination=payload.get("destination") or payload.get("dest") or payload.get("lane"),
+        pd=payload.get("pd") or payload.get("outbound_pd") or payload.get("door"),
+        belt=payload.get("belt") or payload.get("outbound_area"),
+        package_count=int(payload.get("package_count") or payload.get("packages") or payload.get("volume") or 0),
+        used_cube=round(used_cube, 2),
+        trailer_capacity=round(trailer_capacity, 2),
+        load_quality=payload.get("load_quality") or payload.get("quality") or "",
+        departure_time=payload.get("departure_time") or payload.get("depart_time") or "",
+        notes=payload.get("notes", ""),
+    )
+
+
 @app.route("/operations", methods=["POST"])
 def create_operation():
     operation = build_operation(request.get_json() or {})
@@ -87,6 +107,34 @@ def create_operations_bulk():
     return jsonify([operation.to_dict() for operation in operations]), 201
 
 
+@app.route("/trailer-cube")
+def get_trailer_cube_records():
+    records = TrailerCubeRecord.query.all()
+
+    return jsonify([
+        record.to_dict() for record in records
+    ])
+
+
+@app.route("/trailer-cube", methods=["POST"])
+def create_trailer_cube_record():
+    record = build_trailer_cube_record(request.get_json() or {})
+    db.session.add(record)
+    db.session.commit()
+
+    return jsonify(record.to_dict()), 201
+
+
+@app.route("/trailer-cube/bulk", methods=["POST"])
+def create_trailer_cube_records_bulk():
+    records = [build_trailer_cube_record(record) for record in request.get_json() or []]
+
+    db.session.add_all(records)
+    db.session.commit()
+
+    return jsonify([record.to_dict() for record in records]), 201
+
+
 @app.route("/kpis")
 def get_kpis():
     return jsonify(calculate_kpis())
@@ -104,4 +152,4 @@ def get_by_shift(shift_name):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5050, debug=True)
